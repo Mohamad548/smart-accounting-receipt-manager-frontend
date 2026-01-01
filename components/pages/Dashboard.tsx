@@ -1,15 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { testGeminiConnection } from '@/lib/api-client';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const { records, creditors, customers } = useApp();
+  const [isTestingGemini, setIsTestingGemini] = useState(false);
   
   const totalDebts = creditors.reduce((sum, c) => sum + c.totalAmount, 0);
   const totalReceivables = customers.reduce((sum, c) => sum + (c.expectedAmount - c.collectedAmount), 0);
   const totalCollected = records.reduce((sum, r) => sum + r.amount, 0);
+  
+  const handleTestGemini = async () => {
+    setIsTestingGemini(true);
+    try {
+      const result = await testGeminiConnection();
+      if (result.success) {
+        toast.success(`✅ ${result.message}\nزمان پاسخ: ${result.responseTime}`, {
+          duration: 5000,
+        });
+      } else {
+        toast.error(`❌ ${result.message}\n${result.error || ''}`, {
+          duration: 7000,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error testing Gemini:', error);
+      toast.error(`❌ خطا در تست اتصال: ${error.message || 'خطای نامشخص'}`, {
+        duration: 7000,
+      });
+    } finally {
+      setIsTestingGemini(false);
+    }
+  };
   
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -90,26 +116,58 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 lg:p-10 rounded-2xl lg:rounded-3xl text-white relative overflow-hidden shadow-xl">
-          <div className="relative z-10">
-            <h3 className="text-xl lg:text-2xl font-black mb-2 lg:mb-3">عملیات سریع</h3>
-            <p className="text-slate-300 font-bold text-sm lg:text-base mb-6 lg:mb-8 leading-relaxed">
-              فیش جدید مشتری را اسکن کنید
-            </p>
-            <div className="grid grid-cols-2 gap-3 lg:gap-4">
-              <Link 
-                href="/upload"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base transition-all shadow-lg text-center"
-              >
-                📸 اسکن فیش
-              </Link>
-              <Link 
-                href="/customers"
-                className="bg-white/10 hover:bg-white/20 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base backdrop-blur-xl transition-all text-center"
-              >
-                👥 مشتری جدید
-              </Link>
+        <div className="space-y-4 lg:space-y-6">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 lg:p-10 rounded-2xl lg:rounded-3xl text-white relative overflow-hidden shadow-xl">
+            <div className="relative z-10">
+              <h3 className="text-xl lg:text-2xl font-black mb-2 lg:mb-3">عملیات سریع</h3>
+              <p className="text-slate-300 font-bold text-sm lg:text-base mb-6 lg:mb-8 leading-relaxed">
+                فیش جدید مشتری را اسکن کنید
+              </p>
+              <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                <Link 
+                  href="/upload"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base transition-all shadow-lg text-center"
+                >
+                  📸 اسکن فیش
+                </Link>
+                <Link 
+                  href="/customers"
+                  className="bg-white/10 hover:bg-white/20 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base backdrop-blur-xl transition-all text-center"
+                >
+                  👥 مشتری جدید
+                </Link>
+              </div>
             </div>
+          </div>
+
+          {/* Test Gemini Connection */}
+          <div className="bg-white p-5 lg:p-6 rounded-2xl lg:rounded-3xl shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base lg:text-lg font-black text-slate-900 mb-1">وضعیت هوش مصنوعی</h3>
+                <p className="text-xs lg:text-sm text-slate-500 font-bold">تست اتصال به Gemini API</p>
+              </div>
+              <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                🤖
+              </div>
+            </div>
+            <button
+              onClick={handleTestGemini}
+              disabled={isTestingGemini}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white p-3 lg:p-4 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base transition-all shadow-md disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isTestingGemini ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>در حال تست...</span>
+                </>
+              ) : (
+                <>
+                  <span>🔗</span>
+                  <span>تست اتصال</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

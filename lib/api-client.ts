@@ -67,6 +67,19 @@ export async function logout() {
   });
 }
 
+export async function testGeminiConnection() {
+  return apiRequest<{ 
+    success: boolean; 
+    message: string; 
+    response?: string;
+    responseTime?: string;
+    error?: string;
+    status?: number;
+  }>('/test-gemini', {
+    method: 'GET',
+  });
+}
+
 // Removed refreshToken - no longer needed
 // Removed getCurrentUser - we use login response instead
 // Authentication is checked via cookies automatically
