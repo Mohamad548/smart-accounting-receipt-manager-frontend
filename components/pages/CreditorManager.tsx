@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useApp } from '@/context/AppContext';
-import { extractCreditorInfo } from '@/lib/api';
+import { extractCreditorInfo, testGeminiConnection } from '@/lib/api';
 import { Creditor } from '@/types';
 
 interface CreditorFormData {
@@ -18,6 +18,7 @@ export default function CreditorManager() {
   const { creditors, setCreditors, records } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -70,19 +71,51 @@ export default function CreditorManager() {
     if (!file) return;
     setIsScanning(true);
     try {
+      console.log('📸 [CreditorManager] Starting image scan...');
       const info = await extractCreditorInfo(file);
+      console.log('✅ [CreditorManager] Image scan successful:', info);
       if (info.name) setValue('name', info.name);
       if (info.account) setValue('accountNumber', info.account);
       if (info.sheba) setValue('shebaNumber', info.sheba.replace(/IR/gi, ''));
+      toast.success('اطلاعات با موفقیت استخراج شد');
     } catch (err: any) {
-      console.error('Error scanning image:', err);
+      console.error('❌ [CreditorManager] Error scanning image:', err);
       const errorMessage = err.message || 'خطا در خواندن تصویر فیش.';
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 5000,
+      });
     } finally {
       setIsScanning(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleTestConnection = async () => {
+    setIsTestingConnection(true);
+    try {
+      console.log('🔄 [CreditorManager] Testing Gemini connection...');
+      const result = await testGeminiConnection();
+      
+      if (result.success) {
+        toast.success(
+          `✅ ${result.message}${result.responseTime ? ` (${result.responseTime})` : ''}`,
+          { duration: 5000 }
+        );
+        console.log('✅ [CreditorManager] Connection test successful:', result);
+      } else {
+        toast.error(
+          `❌ ${result.message}${result.error ? `: ${result.error}` : ''}`,
+          { duration: 7000 }
+        );
+        console.error('❌ [CreditorManager] Connection test failed:', result);
+      }
+    } catch (err: any) {
+      console.error('❌ [CreditorManager] Connection test error:', err);
+      toast.error('خطا در تست اتصال. لطفاً دوباره تلاش کنید.', { duration: 5000 });
+    } finally {
+      setIsTestingConnection(false);
     }
   };
 
@@ -247,7 +280,7 @@ export default function CreditorManager() {
             </div>
 
             <div className="p-5 lg:p-8 overflow-y-auto">
-              <div className="mb-4 lg:mb-6">
+              <div className="mb-4 lg:mb-6 space-y-3">
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -258,9 +291,18 @@ export default function CreditorManager() {
                 <button 
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 lg:py-4 rounded-xl lg:rounded-2xl border-2 border-dashed bg-indigo-50 text-indigo-600 border-indigo-200 font-bold text-sm lg:text-base flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  disabled={isScanning}
+                  className="w-full py-3 lg:py-4 rounded-xl lg:rounded-2xl border-2 border-dashed bg-indigo-50 text-indigo-600 border-indigo-200 font-bold text-sm lg:text-base flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isScanning ? '⏳ در حال خواندن...' : '📸 اسکن مشخصات حساب'}
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleTestConnection}
+                  disabled={isTestingConnection}
+                  className="w-full py-3 lg:py-4 rounded-xl lg:rounded-2xl border-2 border-solid bg-emerald-50 text-emerald-600 border-emerald-200 font-bold text-sm lg:text-base flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-100"
+                >
+                  {isTestingConnection ? '⏳ در حال تست...' : '🔌 تست اتصال به مدل هوش مصنوعی'}
                 </button>
               </div>
               

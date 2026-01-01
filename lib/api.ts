@@ -43,7 +43,24 @@ async function apiRequestWithFormData<T>(
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'خطا در ارتباط با سرور' }));
     const errorMessage = error.message || 'خطا در ارتباط با سرور';
-    toast.error(errorMessage);
+    const errorDetails = error.details || error.error || '';
+    
+    // Log detailed error information
+    console.error('❌ [apiRequestWithFormData] Request failed:', {
+      endpoint,
+      status: response.status,
+      message: errorMessage,
+      details: errorDetails,
+    });
+    
+    // Show more detailed error message
+    const fullErrorMessage = errorDetails 
+      ? `${errorMessage}\n${errorDetails}` 
+      : errorMessage;
+    
+    toast.error(fullErrorMessage, {
+      duration: 6000,
+    });
     throw new Error(errorMessage);
   }
 
@@ -63,5 +80,63 @@ export const extractCreditorInfo = async (imageFile: File): Promise<{ name: stri
   const formData = new FormData();
   formData.append('image', imageFile);
   return apiRequestWithFormData<{ name: string, account: string, sheba: string }>('/extract-creditor', formData);
+};
+
+// Test Gemini API connection
+export const testGeminiConnection = async (): Promise<{
+  success: boolean;
+  message: string;
+  response?: string;
+  responseTime?: string;
+  error?: string;
+  status?: number;
+}> => {
+  const token = getAccessToken();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+    console.log('🔑 [testGeminiConnection] Sending request with Authorization header');
+  } else {
+    console.warn('⚠️ [testGeminiConnection] No token available');
+  }
+
+  try {
+    console.log('🔄 [testGeminiConnection] Testing Gemini API connection...');
+    const response = await fetch(`${API_BASE_URL}/test-gemini`, {
+      method: 'GET',
+      credentials: 'include',
+      headers,
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ [testGeminiConnection] Test failed:', data);
+      return {
+        success: false,
+        message: data.message || 'خطا در تست اتصال',
+        error: data.error || 'Unknown error',
+        status: response.status,
+      };
+    }
+
+    console.log('✅ [testGeminiConnection] Test successful:', data);
+    return {
+      success: true,
+      message: data.message || 'اتصال برقرار است',
+      response: data.response,
+      responseTime: data.responseTime,
+    };
+  } catch (error: any) {
+    console.error('❌ [testGeminiConnection] Network error:', error);
+    return {
+      success: false,
+      message: 'خطا در ارتباط با سرور',
+      error: error.message || 'Network error',
+    };
+  }
 };
 
