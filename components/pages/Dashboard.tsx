@@ -12,78 +12,100 @@ export default function Dashboard() {
   const totalCollected = records.reduce((sum, r) => sum + r.amount, 0);
   
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Financial Health Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-2 h-full bg-red-500"></div>
-          <p className="text-slate-400 text-xs font-black uppercase mb-2 tracking-widest">کل بدهی به صراف (خروجی)</p>
-          <p className="text-4xl font-black text-red-600 tabular-nums">
-            {totalDebts.toLocaleString('fa-IR')}
-            <span className="text-sm font-bold mr-2">ریال</span>
-          </p>
+    <div className="space-y-4 lg:space-y-6">
+      {/* Financial Cards - Mobile: Stack, Desktop: Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="bg-white p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-2 h-12 bg-red-500 rounded-full"></div>
+            <div className="flex-1 mr-3">
+              <p className="text-slate-500 text-xs font-bold mb-1">کل بدهی به صراف</p>
+              <p className="text-2xl lg:text-3xl font-black text-red-600 tabular-nums">
+                {totalDebts.toLocaleString('fa-IR')}
+                <span className="text-xs lg:text-sm font-bold mr-1">ریال</span>
+              </p>
+            </div>
+          </div>
         </div>
         
-        <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-2 h-full bg-emerald-500"></div>
-          <p className="text-slate-400 text-xs font-black uppercase mb-2 tracking-widest">مانده طلب از مشتریان (ورودی)</p>
-          <p className="text-4xl font-black text-emerald-600 tabular-nums">
-            {totalReceivables.toLocaleString('fa-IR')}
-            <span className="text-sm font-bold mr-2">ریال</span>
-          </p>
+        <div className="bg-white p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-2 h-12 bg-emerald-500 rounded-full"></div>
+            <div className="flex-1 mr-3">
+              <p className="text-slate-500 text-xs font-bold mb-1">مانده طلب از مشتریان</p>
+              <p className="text-2xl lg:text-3xl font-black text-emerald-600 tabular-nums">
+                {totalReceivables.toLocaleString('fa-IR')}
+                <span className="text-xs lg:text-sm font-bold mr-1">ریال</span>
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-indigo-600 p-10 rounded-[3rem] shadow-2xl shadow-indigo-200 relative overflow-hidden text-white">
-          <p className="text-indigo-200 text-xs font-black uppercase mb-2 tracking-widest">تراز نهایی نقدی</p>
-          <p className="text-4xl font-black tabular-nums">
-            {(totalCollected - totalDebts).toLocaleString('fa-IR')}
-            <span className="text-sm font-bold mr-2">ریال</span>
-          </p>
+        <div className="bg-indigo-600 p-6 lg:p-8 rounded-2xl lg:rounded-3xl shadow-lg text-white">
+          <div className="mb-3">
+            <p className="text-indigo-200 text-xs font-bold mb-1">تراز نهایی نقدی</p>
+            <p className="text-2xl lg:text-3xl font-black tabular-nums">
+              {(totalCollected - totalDebts).toLocaleString('fa-IR')}
+              <span className="text-xs lg:text-sm font-bold mr-1">ریال</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Debts Section */}
-        <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-black text-slate-900">لیست پرداخت‌های فوری (صراف)</h3>
-            <Link href="/creditors" className="text-indigo-600 font-bold text-sm hover:underline">
-              مدیریت لیست بدهی ←
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Recent Debts */}
+        <div className="bg-white p-5 lg:p-8 rounded-2xl lg:rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex justify-between items-center mb-4 lg:mb-6">
+            <h3 className="text-base lg:text-xl font-black text-slate-900">پرداخت‌های فوری</h3>
+            <Link 
+              href="/creditors" 
+              className="text-indigo-600 font-bold text-xs lg:text-sm hover:underline"
+            >
+              همه ←
             </Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {creditors.slice(0, 4).map(c => (
-              <div key={c.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <div>
-                  <p className="font-black text-slate-800">{c.name}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">{c.accountNumber}</p>
+              <div 
+                key={c.id} 
+                className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-sm lg:text-base text-slate-800 truncate">{c.name}</p>
+                  <p className="text-[10px] lg:text-xs text-slate-400 font-mono mt-1">{c.accountNumber}</p>
                 </div>
-                <div className="text-left">
-                  <p className="font-black text-red-500 tabular-nums">{c.totalAmount.toLocaleString('fa-IR')}</p>
-                  <p className="text-[10px] font-black text-slate-400 uppercase">بایستی پرداخت شود</p>
+                <div className="text-left mr-4 flex-shrink-0">
+                  <p className="font-black text-red-500 text-sm lg:text-base tabular-nums">
+                    {c.totalAmount.toLocaleString('fa-IR')}
+                  </p>
+                  <p className="text-[9px] lg:text-[10px] font-bold text-slate-400">باید پرداخت شود</p>
                 </div>
               </div>
             ))}
-            {creditors.length === 0 && <p className="text-center py-10 text-slate-300 font-bold">بدهی ثبت شده‌ای ندارید</p>}
+            {creditors.length === 0 && (
+              <p className="text-center py-8 text-slate-400 font-bold text-sm">بدهی ثبت شده‌ای ندارید</p>
+            )}
           </div>
         </div>
 
-        {/* Action Center */}
-        <div className="bg-slate-900 p-12 rounded-[3.5rem] flex flex-col justify-center text-white relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        {/* Quick Actions */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 lg:p-10 rounded-2xl lg:rounded-3xl text-white relative overflow-hidden shadow-xl">
           <div className="relative z-10">
-            <h3 className="text-3xl font-black mb-4">عملیات سریع</h3>
-            <p className="text-slate-400 font-bold mb-10 max-w-xs leading-relaxed">فیش جدید مشتری را اسکن کنید تا تراز مالی به صورت هوشمند بروزرسانی شود.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-xl lg:text-2xl font-black mb-2 lg:mb-3">عملیات سریع</h3>
+            <p className="text-slate-300 font-bold text-sm lg:text-base mb-6 lg:mb-8 leading-relaxed">
+              فیش جدید مشتری را اسکن کنید
+            </p>
+            <div className="grid grid-cols-2 gap-3 lg:gap-4">
               <Link 
                 href="/upload"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white p-6 rounded-[2rem] font-black text-lg transition-all shadow-xl shadow-emerald-500/20 text-center"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base transition-all shadow-lg text-center"
               >
                 📸 اسکن فیش
               </Link>
               <Link 
                 href="/customers"
-                className="bg-white/10 hover:bg-white/20 text-white p-6 rounded-[2rem] font-black text-lg backdrop-blur-xl transition-all text-center"
+                className="bg-white/10 hover:bg-white/20 text-white p-4 lg:p-5 rounded-xl lg:rounded-2xl font-black text-sm lg:text-base backdrop-blur-xl transition-all text-center"
               >
                 👥 مشتری جدید
               </Link>

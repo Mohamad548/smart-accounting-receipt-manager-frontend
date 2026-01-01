@@ -25,63 +25,52 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-72 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col border-l border-slate-800">
-      <div className="p-8 border-b border-slate-800/50">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-2xl shadow-2xl shadow-indigo-500/20">
+    <aside className="w-64 bg-white border-l border-slate-200 flex-shrink-0 hidden lg:flex flex-col">
+      <div className="p-6 border-b border-slate-200">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-xl shadow-lg">
             ⚖️
           </div>
           <div>
-            <span className="font-black text-xl block leading-tight">حسابداری شتا توربو</span>
-            <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Smart Ledger v2</span>
+            <div className="font-black text-lg text-slate-900">حسابداری شتا</div>
+            <div className="text-[10px] text-slate-500 font-bold">Smart Ledger</div>
           </div>
         </div>
       </div>
       
-      <nav className="flex-1 p-6 space-y-3">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || (item.href === '/' && pathname === '/');
           return (
             <Link
               key={item.id}
               href={item.href}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all relative group ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-indigo-600 text-white shadow-md' 
+                  : 'text-slate-700 hover:bg-slate-100'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-black text-sm">{item.label}</span>
-              {isActive && (
-                <div className="absolute left-2 w-1.5 h-6 bg-white rounded-full"></div>
-              )}
+              <span className="text-lg">{item.icon}</span>
+              <span className="font-bold text-sm">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-6 space-y-3">
-        <div className="bg-slate-800/50 p-6 rounded-[2rem] border border-slate-700/50">
-          <p className="text-[10px] font-black text-indigo-400 mb-2 uppercase">وضعیت سیستم</p>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-bold">هوش مصنوعی فعال</span>
+      <div className="p-4 border-t border-slate-200 space-y-2">
+        {username && (
+          <div className="px-4 py-2 bg-slate-50 rounded-xl">
+            <div className="text-[10px] text-slate-500 font-bold mb-1">کاربر فعال</div>
+            <div className="text-sm font-bold text-slate-900">{username}</div>
           </div>
-          {username && (
-            <div className="pt-3 border-t border-slate-700/50">
-              <p className="text-[10px] font-black text-slate-400 mb-1 uppercase">کاربر فعال</p>
-              <p className="text-xs font-bold text-white">{username}</p>
-            </div>
-          )}
-        </div>
-        
+        )}
         <button
           onClick={handleLogout}
-          className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 px-5 py-4 rounded-2xl transition-all flex items-center gap-4 group border border-red-500/20"
+          className="w-full flex items-center gap-3 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-bold text-sm"
         >
-          <span className="text-xl">🚪</span>
-          <span className="font-black text-sm">خروج از سیستم</span>
+          <span className="text-lg">🚪</span>
+          <span>خروج از سیستم</span>
         </button>
       </div>
     </aside>
