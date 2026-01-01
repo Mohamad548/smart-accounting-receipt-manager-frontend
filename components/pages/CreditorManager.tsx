@@ -123,6 +123,14 @@ export default function CreditorManager() {
     setIsModalOpen(false);
   };
 
+  const deleteCreditor = () => {
+    if (confirmDeleteId) {
+      setCreditors(prev => prev.filter(c => c.id !== confirmDeleteId));
+      setConfirmDeleteId(null);
+      toast.success('صراف با موفقیت حذف شد');
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
@@ -233,6 +241,21 @@ export default function CreditorManager() {
               </div>
               <button type="submit" className="w-full bg-red-500 text-white font-black py-5 rounded-2xl hover:bg-red-600 shadow-xl transition-all">ثبت نهایی</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[110] animate-fadeIn p-4">
+          <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full text-center shadow-2xl">
+            <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">⚠️</div>
+            <h3 className="text-2xl font-black text-slate-900 mb-2">تایید حذف صراف</h3>
+            <p className="text-slate-500 font-bold mb-8">با حذف صراف، تمامی سوابق مربوط به او نیز حذف می‌شود. آیا مطمئن هستید؟</p>
+            <div className="flex gap-4">
+              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 bg-slate-100 text-slate-600 font-black py-4 rounded-2xl transition-colors hover:bg-slate-200">خیر</button>
+              <button onClick={deleteCreditor} className="flex-1 bg-red-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-red-100 transition-colors hover:bg-red-600">بله، حذف شود</button>
+            </div>
           </div>
         </div>
       )}
