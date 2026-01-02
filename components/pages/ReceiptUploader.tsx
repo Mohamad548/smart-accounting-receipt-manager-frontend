@@ -18,6 +18,7 @@ export default function ReceiptUploader() {
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateRecord, setDuplicateRecord] = useState<ReceiptRecord | null>(null);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [dragOverCustomerId, setDragOverCustomerId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredCustomers = customers.filter(c => c.name.includes(searchTerm));
@@ -139,6 +140,46 @@ export default function ReceiptUploader() {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent, customerId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCustomerId(customerId);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCustomerId(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, customer: Customer) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCustomerId(null);
+
+    const files = e.dataTransfer.files;
+    if (files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      setError('لطفاً فقط فایل تصویر آپلود کنید');
+      return;
+    }
+
+    // Open scanner for this customer
+    openScanner(customer);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Process file
+    autoProcess(file);
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -170,8 +211,15 @@ export default function ReceiptUploader() {
           <tbody className="divide-y divide-slate-50">
             {filteredCustomers.map(c => {
               const remaining = c.expectedAmount - c.collectedAmount;
+              const isDragOver = dragOverCustomerId === c.id;
               return (
-                <tr key={c.id} className="hover:bg-indigo-50/30 transition-all group">
+                <tr 
+                  key={c.id} 
+                  className={`hover:bg-indigo-50/30 transition-all group ${isDragOver ? 'bg-indigo-100 border-2 border-indigo-400 border-dashed' : ''}`}
+                  onDragOver={(e) => handleDragOver(e, c.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, c)}
+                >
                   <td className="px-8 py-5 font-black text-slate-800">{c.name}</td>
                   <td className="px-8 py-5 text-center font-bold text-slate-400 tabular-nums">{c.expectedAmount.toLocaleString('fa-IR')}</td>
                   <td className="px-8 py-5 text-center font-black text-red-500 tabular-nums">{remaining.toLocaleString('fa-IR')}</td>
